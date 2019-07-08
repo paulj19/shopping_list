@@ -6,7 +6,7 @@
 #include <SPI.h>
 #include <MFRC522.h>
 #include<shopping_list.h>
-
+#include <SoftwareSerial.h>
 
 //LIST GLOBALS
 
@@ -20,7 +20,6 @@ char cost_string[16];
 
 // PINS
 const byte interruptPin = 3;
-int erase_btn_state = 0;
 
 const int rs = 2, en = 6, d4 = 5, d5 = 4, d6 = 8, d7 = 7;
 
@@ -30,6 +29,8 @@ constexpr uint8_t SS_PIN = 10;
 //INITIALIZATIONS
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 MFRC522 mfrc522(SS_PIN, RST_PIN);
+SoftwareSerial ESPserial(A1, A0);
+
 
 //RFID SPECIFIC
 byte item1_uid[4] = {0x23, 0x7a, 0x4f, 0x1b};  
@@ -213,7 +214,8 @@ void print_lcd_bottom(String str)
 void setup() {
 	Serial.begin(9600);	
   lcd.begin(16, 2);
-
+  ESPserial.begin(9600);
+  
 	while (!Serial);		
 
 	SPI.begin();	
@@ -241,14 +243,16 @@ void loop() {
   if(success){
           Serial.println ("new card read");
     if(item_in_list()){
+      ESPserial.write(rfid_iterator->name);
       Serial.println("Item is in list");
       Serial.print(rfid_iterator->name);
       Serial.println ("  purchased");
       Serial.println ("  cost");
-Serial.print(rfid_iterator->price);
+      Serial.print(rfid_iterator->price);
 
       total_cost += rfid_iterator->price;
       rfid_iterator = list.erase(rfid_iterator);
+      
 
       Serial.print("total cost: ");
       Serial.println (total_cost);
