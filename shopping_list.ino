@@ -14,6 +14,8 @@ list_items list("item_1,item_2,item_3,item_4");
 list_items::iterator print_iterator;
 list_items::iterator rfid_iterator;
 
+int total_cost = 0;
+
 char cost_string[16];
 
 // PINS
@@ -32,19 +34,16 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 //RFID SPECIFIC
 byte item1_uid[4] = {0x23, 0x7a, 0x4f, 0x1b};  
 byte item2_uid[4]= {0x09, 0xcb, 0x8b, 0x63};
-byte item3_uid[4] = {0x13, 0x7a, 0x4f, 0x1b};  
-byte item4_uid[4]= {0x19, 0xcb, 0x8b, 0x63};
+byte item3_uid[4] = {0x23, 0x7a, 0x4f, 0x1b};  
+byte item4_uid[4]= {0x09, 0xcb, 0x8b, 0x63};
 
 char cur_item[10];
 byte readCard[4]; 
 bool success;
 
-//ITEM SPECIFIC
-bool is_item1_purchased = false;
-bool is_item2_purchased = false;
 
-int total_cost = 0;
-int cur_item_cost;
+
+
 
 
 
@@ -64,13 +63,13 @@ void init_prices()
 }
 void init_uids()
 {
-  list.set_price(print_iterator, item1_uid);
+  list.set_uid(print_iterator, item1_uid);
   print_iterator = list.next(print_iterator);
-  list.set_price(print_iterator, item2_uid);
+  list.set_uid(print_iterator, item2_uid);
   print_iterator = list.next(print_iterator);
-  list.set_price(print_iterator, item3_uid);
+  list.set_uid(print_iterator, item3_uid);
   print_iterator = list.next(print_iterator);
-  list.set_price(print_iterator, item4_uid);
+  list.set_uid(print_iterator, item4_uid);
   print_iterator = list.begin();
 }
 void interrupt_handler()
@@ -132,6 +131,8 @@ bool compare_uid(list_items::iterator it)
 {
    for(int i = 0; i<4; ++i)
    {
+    Serial.println(readCard[i], HEX);
+    Serial.println((it->uid)[i], HEX);
       if(readCard[i] != (it->uid)[i])
         return false;
    }
@@ -146,6 +147,7 @@ bool compare_uid(list_items::iterator it)
 */
 bool item_in_list()
 {
+  Serial.println("Item list check");
 
   for(rfid_iterator = list.begin(); !rfid_iterator.isEnd(); rfid_iterator = list.next(rfid_iterator))
   {
@@ -233,18 +235,17 @@ void setup() {
 
 void loop() {
 
-  if(list.isEmpty()){
-    print_lcd_bottom("list empty");
-    delay(1000);
-    return;
-  } 
 
   success = getID();
 
   if(success){
+          Serial.println ("new card read");
     if(item_in_list()){
+      Serial.println("Item is in list");
       Serial.print(rfid_iterator->name);
       Serial.println ("  purchased");
+      Serial.println ("  cost");
+Serial.print(rfid_iterator->price);
 
       total_cost += rfid_iterator->price;
       rfid_iterator = list.erase(rfid_iterator);
@@ -262,6 +263,12 @@ void loop() {
     }
     delay(500);
   }
+
+  if(list.isEmpty()){
+    print_lcd_bottom("list empty");
+    delay(1000);
+    return;
+  } 
 
 #if 0
   if(l.isEmpty()){
