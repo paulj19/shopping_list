@@ -35,6 +35,7 @@
 #include <LiquidCrystal.h>
 #include <SPI.h>
 #include <MFRC522.h>
+#include <shopping_list.h>
 
 constexpr uint8_t RST_PIN = 9;          // Configurable, see typical pin layout above
 constexpr uint8_t SS_PIN = 10;         // Configurable, see typical pin layout above
@@ -148,7 +149,7 @@ void setup() {
   lcd.setCursor(0,1);
 	Serial.println("Scan PICC to see UID, SAK, type, and data blocks...");
 
-
+lcd.print("started");
   
 }
 

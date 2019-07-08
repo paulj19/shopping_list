@@ -8,8 +8,7 @@ int erase_btn_state = 0;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 
-
-list_items l("item_1,item_2,item_3,item_4");
+list_items l("item_1:10,item_2:10");
 list_items::iterator it;
 
 char to_remove[10];
